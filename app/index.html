@@ -36,16 +36,19 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-5">
+        <div class="col-4">
             <input type="text" class="form-control" id="device_address"
-                   placeholder="Device Address: e.g. 0x75f9d564043...">
+                   placeholder="Device Address: e.g. 0x16a89Bed4ee71c8E3D8CfA16ED89Cb0350F380Ee">
         </div>
-        <div class="col-5">
+        <div class="col-4">
             <input type="text" class="form-control" id="serial"
                    placeholder="Serial Number">
         </div>
-        <div class="col-2">
+        <div class="col-2 justify-content-md-center">
             <button type="button" onclick="App.register()" class="btn btn-primary">Register</button>
+        </div>
+        <div class="col-2">
+            <button type="button" onclick="App.watch()" class="btn btn-primary">Watch Existing</button>
         </div>
     </div>
     <div class="row">
@@ -72,12 +75,6 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <!--<tr>-->
-                        <!--<td class="row_device_address">0x006d8fc29a34d1d032f050440c85d859e975d086</td>-->
-                        <!--<td> -</td>-->
-                        <!--<td id="td-count-0x006d8fc29a34d1d032f050440c85d859e975d086"> -</td>-->
-                        <!--<td> -</td>-->
-                    <!--</tr>-->
                     </tbody>
                 </table>
             </div>

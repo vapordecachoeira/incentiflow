@@ -8,6 +8,8 @@ var Meter = contract(meter_artifacts);
 
 var accounts;
 var account;
+var NETWORK = "Rinkeby";
+var CONTRACT_ADDRESS = "0xCe213940F782df68349546Ab120f5c286A13551C";
 
 window.App = {
     start: function () {
@@ -27,7 +29,11 @@ window.App = {
             // self.refreshBalance();
         });
 
-        Meter.deployed().then(function (contract) {
+
+        self.meter = Meter.at(CONTRACT_ADDRESS);
+        self.setStatus('Using Meter contract at: ' + NETWORK + ' - ' + CONTRACT_ADDRESS);
+
+        self.meter.then(function (contract) {
             var updates = contract.Updated({fromBlock: "latest"});
             updates.watch(function (err, response) {
                 if (error == null) {
@@ -46,33 +52,19 @@ window.App = {
     getSerial: function () {
         var self = this;
         let device_address = $('#device_address').val();
-        Meter.deployed().then(function (instance) {
+        self.meter.then(function (instance) {
             return instance.get_serial.call(device_address, {from: account});
-        }).then(function (value) {
-            self.setStatus('Serial: ' + value);
+        }).then(function (serial) {
+            $('#td-serial-' + device_address).html(serial.toString());
         }).catch(function (e) {
             console.log(e);
             self.setStatus('Error getting serial. Check the console.');
         });
     },
 
-    updateCount: function () {
-        var self = this;
-        let device_address = $('#device_address').val();
-        let count = $('#count').val();
-        Meter.deployed().then(function (instance) {
-            return instance.update(count, {from: account, gas: 210000});
-        }).then(function (result) {
-            $('#td-count-' + account).html(count.toString());
-        }).catch(function (e) {
-            console.log(e);
-            self.setStatus('Error getting device count. Check the console.');
-        });
-    },
-
     getCount: function (device_address) {
         var self = this;
-        Meter.deployed().then(function (instance) {
+        self.meter.then(function (instance) {
             return instance.get_count.call(device_address, {from: account});
         }).then(function (count) {
             $('#td-count-' + device_address).html(count.toString());
@@ -82,32 +74,64 @@ window.App = {
         });
     },
 
+    getCreatedAt: function (device_address) {
+        var self = this;
+        self.meter.then(function (instance) {
+            return instance.get_created_at.call(device_address, {from: account});
+        }).then(function (created_at) {
+            $('#td-created-' + device_address).html(created_at.toString());
+        }).catch(function (e) {
+            console.log(e);
+            self.setStatus('Error getting device created at data. Check the console.');
+        });
+    },
+
     register: function () {
         var self = this;
         var device_address = $('#device_address').val();
         let serial = $('#serial').val();
         let created_at_unix_time_gmt = Date.now() / 1000;
-        Meter.deployed().then(function (instance) {
+        self.meter.then(function (instance) {
             return instance.register(device_address, serial, created_at_unix_time_gmt, {
                 gas: 210000,
                 from: account
             });
         }).then(function (result) {
-            self.setStatus('Registered!');
-            let date_str = new Date(created_at_unix_time_gmt);
-            $("<tr><td class='row_device_address'>" + device_address + "</td><td>" + serial + "</td><td id='td-count-" + device_address + "'> - </td><td>" + date_str + "</td></tr>").appendTo("#devicesTable tbody");
-            self.getCount(device_address);
+            self.watch();
         }).catch(function (e) {
             console.log(e);
             self.setStatus('Error registering. Check the console.');
         });
     },
 
+    watch: function () {
+        var addr = $('#device_address').val();
+        $("<tr><td class='row_device_address'>" + addr + "</td><td id='td-serial-" + addr + "'>" +
+            "</td><td id='td-count-" + addr + "'> - </td><td id='td-created-" + addr + "'>" +
+            "- </td></tr>").appendTo("#devicesTable tbody");
+        this.getCount(addr);
+        this.getSerial(addr);
+        this.getCreatedAt(addr);
+    },
+
+    updateCount: function () {
+        var self = this;
+        let device_address = $('#device_address').val();
+        let count = $('#count').val();
+        self.meter.then(function (instance) {
+            return instance.update(count, {from: account, gas: 210000});
+        }).then(function (result) {
+            $('#td-count-' + account).html(count.toString());
+        }).catch(function (e) {
+            console.log(e);
+            self.setStatus('Error getting device count. Check the console.');
+        });
+    },
+
     loopRefreshCounters: function () {
         var self = this;
-        $( ".row_device_address" ).each(function( index ) {
-            console.log( index + ": " + $( this ).text() );
-            self.App.getCount($( this ).text());
+        $(".row_device_address").each(function (index) {
+            self.App.getCount($(this).text());
         });
     }
 };
