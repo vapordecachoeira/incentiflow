@@ -59,6 +59,12 @@ window.App = {
         self.setStatus('Initializing sponsorship contract at: ' + NETWORK + ' - ' + SPONSORSHIP_CONTRACT_ADDRESS);
     },
 
+    addRow: function (addr) {
+        $("<tr><td class='td-device_type-" + addr + "'></td><td class='td-device_address-'>" + addr + "</td><td id='td-serial-" + addr + "'> - " +
+            "</td><td id='td-count-" + addr + "'> - </td><td id='td-balance-" + addr + "'> - </td>" +
+            "<td id='td-created_at-" + addr + "'> - </td></tr>").appendTo("#devicesTable tbody");
+    },
+
     checkRegistrationAccess: function (message) {
         var self = this;
         self.meter.owner.call().then((contract_owner) => {
@@ -70,20 +76,13 @@ window.App = {
         });
     },
 
-    setStatus: function (message) {
-        var status = document.getElementById('status');
-        status.innerHTML = message;
-    },
-
-    getSerial: function (device_address) {
+    getBalance: function (device_address) {
         var self = this;
-        self.meter.then(function (instance) {
-            return instance.getSerial.call(device_address, {from: account});
-        }).then(function (serial) {
-            $('#td-serial-' + device_address).html(serial.toString());
+        self.sponsorship.balance.call(device_address).then(function (balance) {
+            $('#td-balance-' + device_address).html(balance.toString());
         }).catch(function (e) {
             console.log(e);
-            self.setStatus('Error getting serial. Check the console.');
+            self.setStatus('Error getting device balance. Check the console.');
         });
     },
 
@@ -99,16 +98,6 @@ window.App = {
         });
     },
 
-    getBalance: function (device_address) {
-        var self = this;
-        self.sponsorship.balance.call(device_address).then(function (balance) {
-            $('#td-balance-' + device_address).html(balance.toString());
-        }).catch(function (e) {
-            console.log(e);
-            self.setStatus('Error getting device balance. Check the console.');
-        });
-    },
-
     getCreatedAt: function (device_address) {
         var self = this;
         self.meter.then(function (instance) {
@@ -120,6 +109,29 @@ window.App = {
         }).catch(function (e) {
             console.log(e);
             self.setStatus('Error getting device created at data. Check the console.');
+        });
+    },
+
+    getSerial: function (device_address) {
+        var self = this;
+        self.meter.then(function (instance) {
+            return instance.getSerial.call(device_address, {from: account});
+        }).then(function (serial) {
+            $('#td-serial-' + device_address).html(serial.toString());
+        }).catch(function (e) {
+            console.log(e);
+            self.setStatus('Error getting serial. Check the console.');
+        });
+    },
+
+    loopRefreshCounters: function () {
+        var self = this;
+        $('.td-device_address-').each(function (index) {
+            var addr = $(this).text();
+            self.App.getCount(addr);
+            self.App.getSerial(addr);
+            self.App.getBalance(addr);
+            self.App.getCreatedAt(addr);
         });
     },
 
@@ -142,23 +154,9 @@ window.App = {
         });
     },
 
-
-    sponsorship_deposit: function() {
-        var self = this;
-        var amount = $('#my_deposit').val();
-        var amount_in_wei = web3.toWei(amount, 'ether');
-        self.sponsorship.then(function (instance) {
-            return instance.deposit({
-                gas: 210000,
-                from: account,
-                value: amount_in_wei
-            });
-        }).then(function (result) {
-            self.setStatus('Deposit successful.');
-        }).catch(function (e) {
-            console.log(e);
-            self.setStatus('Error depositing. Check the console.');
-        });
+    setStatus: function (message) {
+        var status = document.getElementById('status');
+        status.innerHTML = message;
     },
 
     sponsor: function() {
@@ -180,35 +178,36 @@ window.App = {
         });
     },
 
-    watch: function () {
-        var addr = $('#device_address').val();
-        this.addRow(addr);
-
-        this.getCount(addr);
-        this.getSerial(addr);
-        this.getBalance(addr);
-        this.getCreatedAt(addr);
-        // this.watchSponsored();
+    sponsorship_deposit: function() {
+        var self = this;
+        var amount = $('#my_deposit').val();
+        var amount_in_wei = web3.toWei(amount, 'ether');
+        self.sponsorship.then(function (instance) {
+            return instance.deposit({
+                gas: 210000,
+                from: account,
+                value: amount_in_wei
+            });
+        }).then(function (result) {
+            self.setStatus('Deposit successful.');
+        }).catch(function (e) {
+            console.log(e);
+            self.setStatus('Error depositing. Check the console.');
+        });
     },
 
-    addRow: function (addr) {
-        $("<tr><td class='td-device_type-" + addr + "'></td><td class='td-device_address-'>" + addr + "</td><td id='td-serial-" + addr + "'> - " +
-            "</td><td id='td-count-" + addr + "'> - </td><td id='td-balance-" + addr + "'> - </td>" +
-            "<td id='td-created_at-" + addr + "'> - </td></tr>").appendTo("#devicesTable tbody");
+    sponsorship_execute: function(count_increase) {
+        var self = this;
+        self.sponsorship.then(function (instance) {
+            return instance.execute(count_increase, {
+                gas: 410000,
+                from: account
+            });
+        }).catch(function (e) {
+            console.log(e);
+            self.setStatus('Error executing sponsorship. Check the console.');
+        });
     },
-
-    // watchSponsored: function() {
-    //     var self = this;
-    //     self.sponsorship.getSponsored.call().then((sponsored) => {
-    //         self.addRow(sponsored, 'SPONSORED');
-    //         self.getCount(sponsored);
-    //         self.getSerial(sponsored);
-    //         self.getBalance(sponsored);
-    //         self.getCreatedAt(sponsored);
-    //     }).catch(function (e) {
-    //         console.log(e);
-    //     });
-    // },
 
     updateCount: function () {
         var self = this;
@@ -233,29 +232,15 @@ window.App = {
         });
     },
 
-    sponsorship_execute: function(count_increase) {
-        var self = this;
-        self.sponsorship.then(function (instance) {
-            return instance.execute(count_increase, {
-                gas: 410000,
-                from: account
-            });
-        }).catch(function (e) {
-            console.log(e);
-            self.setStatus('Error executing sponsorship. Check the console.');
-        });
-    },
-
-    loopRefreshCounters: function () {
-        var self = this;
-        $('.td-device_address-').each(function (index) {
-            var addr = $(this).text();
-            self.App.getCount(addr);
-            self.App.getSerial(addr);
-            self.App.getBalance(addr);
-            self.App.getCreatedAt(addr);
-        });
+    watch: function () {
+        var addr = $('#device_address').val();
+        this.addRow(addr);
+        this.getCount(addr);
+        this.getSerial(addr);
+        this.getBalance(addr);
+        this.getCreatedAt(addr);
     }
+
 };
 
 window.addEventListener('load', function () {
