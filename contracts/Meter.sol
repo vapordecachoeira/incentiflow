@@ -4,11 +4,10 @@ pragma solidity ^0.4.0;
 contract Meter {
 
 	struct Device {
-	address id;
-	string serial;
-	uint256 count;
-	uint256 created_at; //unix_time_gmt;
-
+		address id;
+		string serial;
+		uint256 count;
+		uint256 created_at; //unix_time_gmt;
 	}
 
 	mapping (address => Device) public devices;
@@ -17,8 +16,7 @@ contract Meter {
 
 	address public owner;
 
-	event Updated(address indexed _from, uint256 _measurement);
-
+	event Updated(address indexed _from, uint256 _current_count, uint256 _increase);
 
 	function Meter() public {
 		owner = msg.sender;
@@ -41,22 +39,23 @@ contract Meter {
 	// Update a Device counter if the sender is the registered owner of the device
 	function update(uint256 measurement) external returns (uint256 count){
 		require(register_list[msg.sender]);
+		uint256 increase = measurement - devices[msg.sender].count;
 		devices[msg.sender].count = measurement;
-		Updated(msg.sender, devices[msg.sender].count);
+		Updated(msg.sender, devices[msg.sender].count, increase);
 		return devices[msg.sender].count;
 	}
 
-	function get_count(address device_address) external returns (uint256 count) {
+	function getCount(address device_address) external returns (uint256 count) {
 		require(register_list[device_address]);
 		return devices[device_address].count;
 	}
 
-	function get_serial(address device_address) external returns (string serial) {
+	function getSerial(address device_address) external returns (string serial) {
 		require(register_list[device_address]);
 		return devices[device_address].serial;
 	}
 
-	function get_created_at(address device_address) external returns (uint256 serial) {
+	function getCreatedAt(address device_address) external returns (uint256 serial) {
 		require(register_list[device_address]);
 		return devices[device_address].created_at;
 	}

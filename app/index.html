@@ -15,11 +15,16 @@
             crossorigin="anonymous"></script>
 </head>
 <body class="container">
-
-<h1>Incentiflow</h1>
-
-<div class="container">
-
+    <div class="row">
+        <div class="col-12">
+            <h1 style="color: #0275d8">Incentiflow</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <p>&nbsp;</p>
+        </div>
+    </div>
     <div class="row">
         <div class="col-12">
             <div class="alert alert-warning alert-dismissible fade show" role="alert" id="status"></div>
@@ -27,12 +32,69 @@
     </div>
     <div class="row">
         <div class="col-12">
-            <p>&nbsp;</p>
+            &nbsp;
         </div>
     </div>
     <div class="row">
+        <div class="col-4">
+            <h3>My address</h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-4">
+            <input type="text" class="form-control" id="my_account_address"
+                   placeholder="My address" disabled="true">
+        </div>
+    </div>
+
+    <div class="row">
         <div class="col-12">
-            <h3>Register a device</h3>
+            <p>&nbsp;</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-4">
+            <h3>Deposit to Sponsorship</h3>
+        </div>
+        <div class="col-4">
+            <h3>Sponsor device</h3>
+        </div>
+        <div class="col-4">
+            <h3>Amount in wei</h3>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-2">
+            <input type="text" class="form-control" id="my_deposit"
+                   placeholder="Amount in Ether">
+        </div>
+        <div class="col-2 justify-content-md-center">
+            <button type="button" onclick="App.sponsorship_deposit()" class="btn btn-primary" id="btn_sponsor">Deposit</button>
+        </div>
+        <div class="col-4">
+            <input type="text" class="form-control" id="my_sponsored_address"
+                   placeholder="Address to sponsor">
+        </div>
+        <div class="col-2 justify-content-md-center">
+            <input type="text" class="form-control" id="wei_per_unit"
+                   placeholder="Amount of wei per counter unit spent">
+        </div>
+        <div class="col-2 justify-content-md-center">
+            <button type="button" onclick="App.sponsor()" class="btn btn-primary" id="btn_sponsor">Sponsor</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <p>&nbsp;</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <h3>Register or Watch a device</h3>
         </div>
     </div>
     <div class="row">
@@ -40,22 +102,24 @@
             <input type="text" class="form-control" id="device_address"
                    placeholder="Device Address: e.g. 0x16a89Bed4ee71c8E3D8CfA16ED89Cb0350F380Ee">
         </div>
-        <div class="col-4">
+        <div class="col-4" id="td_serial">
             <input type="text" class="form-control" id="serial"
                    placeholder="Serial Number">
         </div>
         <div class="col-2 justify-content-md-center">
-            <button type="button" onclick="App.register()" class="btn btn-primary">Register</button>
+            <button type="button" onclick="App.register()" class="btn btn-primary" id="btn_register">Register</button>
         </div>
         <div class="col-2">
             <button type="button" onclick="App.watch()" class="btn btn-primary">Watch Existing</button>
         </div>
     </div>
+
     <div class="row">
         <div class="col-12">
             <p>&nbsp;</p>
         </div>
     </div>
+
     <div class="row">
         <div class="col-12">
             <h3>Registered Devices</h3>
@@ -71,6 +135,7 @@
                         <th>Meter Address</th>
                         <th>Serial</th>
                         <th>Count</th>
+                        <th>Balance</th>
                         <th>Created at</th>
                     </tr>
                     </thead>
@@ -85,12 +150,12 @@
             <p>&nbsp;</p>
         </div>
     </div>
-    <div class="row" style="display: none;">
+    <div class="row" style="display: true;">
         <div class="col-12">
             <h4>Force update count for self</h4>
         </div>
     </div>
-    <div class="row" style="display: none;">
+    <div class="row" style="display: true;">
         <div class="col-10">
             <input type="text" class="form-control" id="count"
                    placeholder="New counter">
@@ -100,7 +165,6 @@
         </div>
     </div>
 
-</div>
 
 </body>
 <script src="https://cdn.rawgit.com/ethereum/web3.js/develop/dist/web3.js"></script>
