@@ -14,21 +14,8 @@ var account;
 // var METER_CONTRACT_ADDRESS = "0xCe213940F782df68349546Ab120f5c286A13551C";
 
 var NETWORK = "Testrpc";
-var METER_CONTRACT_ADDRESS = "0x0018fb4deb095b2f4a1843d29524e6327c06072c";
-var SPONSORSHIP_CONTRACT_ADDRESS = "0x7dea004855fd92e0445d1dd0da2df3b5f7ff0976";
-
-
-// Workaround to get account balances
-const promisify = (inner) =>
-    new Promise((resolve, reject) =>
-        inner((err, res) => {
-            if (err) { reject(err) }
-            resolve(res);
-        })
-    );
-
-const getBalance = (account, at) =>
-    promisify(cb => web3.eth.getBalance(account, at, cb));
+var METER_CONTRACT_ADDRESS = "0xf5546e31b85c29d4f5760a07926d08f3808ea8d5";
+var SPONSORSHIP_CONTRACT_ADDRESS = "0x4a1a828e06351e835c023bc6a9e2beb570d38caf";
 
 
 window.App = {
@@ -52,9 +39,6 @@ window.App = {
             self.visitor_address = web3.eth.coinbase;
             $('#my_account_address').val(self.visitor_address);
         });
-
-
-
 
         // Initialize Meter
         self.meter = Meter.at(METER_CONTRACT_ADDRESS);
@@ -91,9 +75,8 @@ window.App = {
         status.innerHTML = message;
     },
 
-    getSerial: function () {
+    getSerial: function (device_address) {
         var self = this;
-        let device_address = $('#device_address').val();
         self.meter.then(function (instance) {
             return instance.getSerial.call(device_address, {from: account});
         }).then(function (serial) {
@@ -118,7 +101,7 @@ window.App = {
 
     getBalance: function (device_address) {
         var self = this;
-        getBalance(device_address).then(function (balance) {
+        self.sponsorship.balance.call(device_address).then(function (balance) {
             $('#td-balance-' + device_address).html(balance.toString());
         }).catch(function (e) {
             console.log(e);
@@ -151,6 +134,7 @@ window.App = {
                 from: account
             });
         }).then(function (result) {
+
             self.watch();
         }).catch(function (e) {
             console.log(e);
@@ -188,6 +172,8 @@ window.App = {
             });
         }).then(function (result) {
             self.setStatus('Sponsoring device: ' + sponsored + ' paying ' + wei_per_unit + ' weis per counter unit used.');
+            $('.td-device_type-' + account).text('SPONSOR');
+            $('.td-device_type-' + sponsored).text('SPONSORED');
         }).catch(function (e) {
             console.log(e);
             self.setStatus('Error depositing. Check the console.');
@@ -202,28 +188,27 @@ window.App = {
         this.getSerial(addr);
         this.getBalance(addr);
         this.getCreatedAt(addr);
-''
-        this.watchSponsored();
+        // this.watchSponsored();
     },
 
-    addRow: function (addr, prefix='') {
-        $("<tr><td class='td-device_address-'>" + prefix + ' ' + addr + "</td><td id='td-serial-" + addr + "'> - " +
+    addRow: function (addr) {
+        $("<tr><td class='td-device_type-" + addr + "'></td><td class='td-device_address-'>" + addr + "</td><td id='td-serial-" + addr + "'> - " +
             "</td><td id='td-count-" + addr + "'> - </td><td id='td-balance-" + addr + "'> - </td>" +
             "<td id='td-created_at-" + addr + "'> - </td></tr>").appendTo("#devicesTable tbody");
     },
 
-    watchSponsored: function() {
-        var self = this;
-        self.sponsorship.getSponsored.call().then((sponsored) => {
-            self.addRow(sponsored, 'SPONSORED - ');
-            self.getCount(sponsored);
-            self.getSerial(sponsored);
-            self.getBalance(sponsored);
-            self.getCreatedAt(sponsored);
-        }).catch(function (e) {
-            console.log(e);
-        });
-    },
+    // watchSponsored: function() {
+    //     var self = this;
+    //     self.sponsorship.getSponsored.call().then((sponsored) => {
+    //         self.addRow(sponsored, 'SPONSORED');
+    //         self.getCount(sponsored);
+    //         self.getSerial(sponsored);
+    //         self.getBalance(sponsored);
+    //         self.getCreatedAt(sponsored);
+    //     }).catch(function (e) {
+    //         console.log(e);
+    //     });
+    // },
 
     updateCount: function () {
         var self = this;
@@ -237,7 +222,7 @@ window.App = {
             for (var i = 0; i < result.logs.length; i++) {
                 var log = result.logs[i];
                 if (log.event == 'Updated') {
-                    self.sponsorship_execute(log.args['_increase'].toNumber());
+                    self.sponsorship_execute(log.args['_increase'].toNumber(), {from: account, gas: 210000});
                     break;
                 }
             }
@@ -264,7 +249,11 @@ window.App = {
     loopRefreshCounters: function () {
         var self = this;
         $('.td-device_address-').each(function (index) {
-            self.App.getCount($(this).text());
+            var addr = $(this).text();
+            self.App.getCount(addr);
+            self.App.getSerial(addr);
+            self.App.getBalance(addr);
+            self.App.getCreatedAt(addr);
         });
     }
 };
@@ -281,6 +270,6 @@ window.addEventListener('load', function () {
         window.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
     }
     App.start();
-    // setInterval(App.loopRefreshCounters, 2000);
+    setInterval(App.loopRefreshCounters, 2000);
 
 });

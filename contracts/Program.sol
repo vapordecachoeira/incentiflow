@@ -21,6 +21,14 @@ contract Program {
 		return true;
 	}
 
+	function balance(address account) external returns(uint256 balance) {
+		if (balances[account] > 0) {
+			return balances[account];
+		} else {
+			return 0;
+		}
+	}
+
 	function withdraw(uint value) external returns(bool success) {
 		require(balances[msg.sender] > value);
 		balances[msg.sender] -= value;
@@ -32,7 +40,7 @@ contract Program {
 	function transfer(address to, uint256 value) public returns(bool success) {
 		require(balances[msg.sender] > value);
 		balances[msg.sender] -= value;
-		to.transfer(value);
+		balances[to] = value;
 		LogTransfer(msg.sender, to, value);
 		return true;
 	}

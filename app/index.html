@@ -54,6 +54,34 @@
     </div>
 
     <div class="row">
+        <div class="col-12">
+            <h3>Register or Watch a device</h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-4">
+            <input type="text" class="form-control" id="device_address"
+                   placeholder="Device Address: e.g. 0x16a89Bed4ee71c8E3D8CfA16ED89Cb0350F380Ee">
+        </div>
+        <div class="col-4" id="td_serial">
+            <input type="text" class="form-control" id="serial"
+                   placeholder="Serial Number">
+        </div>
+        <div class="col-2 justify-content-md-center">
+            <button type="button" onclick="App.register()" class="btn btn-primary" id="btn_register" style="width:100%;">Register</button>
+        </div>
+        <div class="col-2">
+            <button type="button" onclick="App.watch()" class="btn btn-primary" style="width:100%;">Watch Existing</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <p>&nbsp;</p>
+        </div>
+    </div>
+
+    <div class="row">
         <div class="col-4">
             <h3>Deposit to Sponsorship</h3>
         </div>
@@ -71,7 +99,7 @@
                    placeholder="Amount in Ether">
         </div>
         <div class="col-2 justify-content-md-center">
-            <button type="button" onclick="App.sponsorship_deposit()" class="btn btn-primary" id="btn_sponsor">Deposit</button>
+            <button type="button" onclick="App.sponsorship_deposit()" class="btn btn-primary" id="btn_sponsor" style="width:100%;">Deposit</button>
         </div>
         <div class="col-4">
             <input type="text" class="form-control" id="my_sponsored_address"
@@ -82,35 +110,7 @@
                    placeholder="Amount of wei per counter unit spent">
         </div>
         <div class="col-2 justify-content-md-center">
-            <button type="button" onclick="App.sponsor()" class="btn btn-primary" id="btn_sponsor">Sponsor</button>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-12">
-            <p>&nbsp;</p>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-12">
-            <h3>Register or Watch a device</h3>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-4">
-            <input type="text" class="form-control" id="device_address"
-                   placeholder="Device Address: e.g. 0x16a89Bed4ee71c8E3D8CfA16ED89Cb0350F380Ee">
-        </div>
-        <div class="col-4" id="td_serial">
-            <input type="text" class="form-control" id="serial"
-                   placeholder="Serial Number">
-        </div>
-        <div class="col-2 justify-content-md-center">
-            <button type="button" onclick="App.register()" class="btn btn-primary" id="btn_register">Register</button>
-        </div>
-        <div class="col-2">
-            <button type="button" onclick="App.watch()" class="btn btn-primary">Watch Existing</button>
+            <button type="button" onclick="App.sponsor()" class="btn btn-primary" id="btn_sponsor" style="width:100%;">Sponsor</button>
         </div>
     </div>
 
@@ -132,10 +132,11 @@
                 <table class="table table-striped table-hover" id="devicesTable">
                     <thead>
                     <tr>
+                        <th></th>
                         <th>Meter Address</th>
                         <th>Serial</th>
                         <th>Count</th>
-                        <th>Balance</th>
+                        <th>Balance in Wei</th>
                         <th>Created at</th>
                     </tr>
                     </thead>
@@ -150,6 +151,8 @@
             <p>&nbsp;</p>
         </div>
     </div>
+    <br>
+    <br>
     <div class="row" style="display: true;">
         <div class="col-12">
             <h4>Force update count for self</h4>
@@ -161,7 +164,7 @@
                    placeholder="New counter">
         </div>
         <div class="col-2">
-            <button type="button" onclick="App.updateCount()" class="btn btn-primary">Update Counter</button>
+            <button type="button" onclick="App.updateCount()" class="btn btn-primary" style="width:100%;">Update Counter</button>
         </div>
     </div>
 
